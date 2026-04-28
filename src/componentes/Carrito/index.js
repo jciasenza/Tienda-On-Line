@@ -1,12 +1,9 @@
 import React, { useContext } from 'react'
 import { DataContext } from "../../context/DataProvider"
-import "boxicons"
+import { FiX, FiChevronUp, FiChevronDown, FiTrash2 } from "react-icons/fi"
 
 export const Carrito = () => {
-    const value = useContext(DataContext)
-    const [menu, setMenu] = value.menu;
-    const [carrito, setCarrito] = value.carrito;
-    const [total] = value.total;
+    const { menu, setMenu, carrito, setCarrito, total } = useContext(DataContext)
 
     const tooglefalse = ()=>{
         setMenu(false);
@@ -15,40 +12,42 @@ export const Carrito = () => {
     const show2 = menu ? "carrito show" : "carrito";
 
     const resta = id =>{
-        carrito.forEach(item =>{
-            if (item.id === id){
-                item.cantidad === 1 ? item.cantidad = 1: item.cantidad -=1
+        const updated = carrito.map(item => {
+            if (item.id === id) {
+                return {
+                    ...item,
+                    cantidad: Math.max(1, item.cantidad - 1)
+                }
             }
-            setCarrito([...carrito])
+            return item;
         })
+        setCarrito(updated)
     }
     const suma = id =>{
-        carrito.forEach(item =>{
-            if (item.id === id){
-                item.cantidad +=1;
+        const updated = carrito.map(item => {
+            if (item.id === id) {
+                return {
+                    ...item,
+                    cantidad: item.cantidad + 1
+                }
             }
-            setCarrito([...carrito])
+            return item;
         })
+        setCarrito(updated)
     }
 
     const removeProducto = id =>{
         if(window.confirm("¿Quieres eliminar el producto?")){
-            carrito.forEach((item, index) => {
-                if (item.id === id){
-                item.cantidad = 1;
-                carrito.splice(index, 1)
-              }
-             })
-             setCarrito([...carrito])
+            const updated = carrito.filter(item => item.id !== id)
+            setCarrito(updated)
         }
-            
     }
     return (
         <div className={show1}>
             <div className={show2}>
                 
                 <div className='carrito__close' onClick={tooglefalse}>
-                    <box-icon name="x"></box-icon>
+                    <FiX />
                 </div>
 
                 <h2>Mi Carrito de Compra</h2>
@@ -67,12 +66,12 @@ export const Carrito = () => {
                             <p className='price'>$ {producto.price}</p>
                         </div>
                         <div>
-                            <box-icon name="up-arrow" type="solid" onClick={()=> suma(producto.id)}></box-icon>
+                            <FiChevronUp onClick={()=> suma(producto.id)} />
                             <p className='cantidad'>{producto.cantidad}</p>
-                            <box-icon name="down-arrow" type="solid" onClick={()=> resta(producto.id)}></box-icon>
+                            <FiChevronDown onClick={()=> resta(producto.id)} />
                         </div>
                         <div className='remove__item' onClick={() =>removeProducto(producto.id)}>
-                             <box-icon name="trash"></box-icon>
+                             <FiTrash2 />
                         </div>
                     </div>
                     )) 

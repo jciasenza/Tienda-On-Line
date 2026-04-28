@@ -2,106 +2,121 @@ import React, { useContext, useState, useEffect } from 'react'
 import { DataContext } from "../../context/DataProvider"
 import { useParams } from 'react-router-dom'
 import { ProductoItem } from "./productoItem";
+import { FiSearch, FiX } from 'react-icons/fi'
 
 export const ProductoDetalles = () => {
-  const value = useContext(DataContext)
-  const [productos] = value.productos;
-  const addCarrito = value.addCarrito;
-  const [detalle, setDetalle] = useState([]);
-  const [url, setUrl] = useState(0);
-  const [images, setImages] = useState('');
+  const { productos, addCarrito } = useContext(DataContext)
+  const [detalle, setDetalle] = useState(null);
+  const [showModal, setShowModal] = useState(false);
   const params = useParams();
-  let item = 0;
 
+  useEffect(() => {
+    const selected = productos.find(producto => producto.id === parseInt(params.id, 10));
+    setDetalle(selected || null);
+  }, [params.id, productos]);
 
-  useEffect(() =>{
-    productos.forEach(producto => {
-      item = 0;
-      if(producto.id === parseInt(params.id)){      
-        setDetalle(producto)
-        setUrl(0)
-      }
-    })
-  },[params.id, productos])
+  if (!detalle) return null;
 
-  useEffect(() =>{
-    const values= `${detalle.img1}${url}${detalle.img2}`
-    setImages(values);
-  },[url, params.id])
-  
-  const handleInput = e =>{
-    const number = e.target.value.toString().padStart(2, '01');
-    setUrl(number)
-  }
-  if(detalle.length < 1) return null;
+  const relacionados = productos
+    .filter(producto => producto.category === detalle.category && producto.id !== detalle.id)
+    .slice(0, 5);
 
     return (
         <>
-        {
           <div className='detalles'>
-           <h2>{detalle.title}</h2>
-           <p className='price'> Precio: $ {detalle.price}</p>
-           <div className='grid'>
-             <p className="nuevo">Nuevo</p>
-             <div className='size'>
-               <select placeholder='Tamaño'>
-                 <option value="1">1</option>
-                 <option value="1">2</option>
-                 <option value="1">3</option>
-                 <option value="1">4</option>
-                 <option value="1">5</option>
-                 <option value="1">6</option>
-                 <option value="1">7</option>
-                 <option value="1">8</option>
-                 <option value="1">9</option>
-               </select>
-               <p>Tamaño</p>
-             </div>
-             <button onClick={()=>addCarrito(detalle.id) }>Añadir al carrito</button>
-           </div>
-           
-          {
-            url ? <img src={images} alt={detalle.title}/> : <img src={detalle.image} alt={detalle.title}/>
-          }
-           <input type="range" min="1" max="36" step="1" value={url} onChange={handleInput} />
-           <div className='description'>
-             <p><b>Descripcion: </b>Nike Air Zoom Pegasus es una zapatilla de Running para entrenamiento diario,
-                  aunque no desmerece si se la lleva a alguna carrera, gracias a su configuración.
-                  Su bajo peso de 280gr en el acabado de hombre y 235gr en el de mujer, en proporción a la amortiguación que gasta, así lo permite.
-                  Los ritmos a los que utilizarla serían los propios relacionados con los rodajes,
-                  pero también es polivalente para utilizarla en entrenamientos fraccionados sin problemas.
-                   La amortiguación, precisamente, está enfocada a corredores y corredoras que tengan una pisada neutra.
-                   Está basada en una mediasuela construida con material ligero y reactivo como es React Foam y, para rematar al conjunto,
-                   se le inserta una cámara de aire, justo bajo los metatarsos, que a esas propiedades le añade una mejor impulsión.
-                   Es una cápsula de Zoom Air nueva, con mayor volumen y presurizada a 20 PSI en el caso de la zapa de hombre y 15 PSI en la de mujer.
-                   Las alturas de la mediasuela son de 24mm en el talón y 14mm en el antepie, para un drop de 10mm.
-                   La suela es la parte más continuista de este modelo, con un gran surco longitudinal para guiar la pisada y unos tacos donde la mayoría tienen forma cuadrada o rectangular para una buena tracción.
-                   Por arriba, el upper es limpio de materiales de refuerzo, pero muy ligero y transpirable.
-                   Pegasus es una de las mejores zapatillas de entrenamiento diario de la historia del Running y esta versión 37 es quizás la que tenga un aspecto más estilizado (Pegasus Turbo aparte),
-                   y aunque sea muy ligera y polivalente, sin duda que para competir sea mejor una zapa voladora, o si se utiliza también para entrenamientos fraccionados, una zapa mixta, por ejemplo.
-              </p>
-           </div>
-           <br/><br/><br/><br/><br/>
-          </div> 
-        }
-        <h2 className='relacionados'>Productos Relacionados</h2>
-        <div className='productos'>
-        {productos.map((producto) =>{
-          if((item < 4) && (detalle.category === producto.category)){
-          item++;
-            return  <ProductoItem 
-              key={producto.id}
-              id={producto.id}
-              title={producto.title}
-              price={producto.price}
-              image={producto.image}
-              category={producto.category}
-              cantidad={producto.cantidad}
-            />
-           }
-          })
-          }    
-        </div>
-      </>
+            <div className='detalles-container'>
+              <div className='detalles-imagen-container'>
+                <img src={detalle.image} alt={detalle.title} className="detalle-imagen" />
+                <div className='detalles-imagen-overlay' onClick={() => setShowModal(true)}>
+                  <FiSearch className='detalles-imagen-icon' />
+                </div>
+              </div>
+              
+              <div className='detalles-info'>
+                <h1>{detalle.title}</h1>
+                <div className='detalles-rating'>
+                  <span className='estrellas'>⭐⭐⭐⭐⭐</span>
+                  <span className='reviews'>(247 opiniones)</span>
+                </div>
+                
+                <div className='detalles-precio'>
+                  <span className='label'>Precio:</span>
+                  <span className='precio'>${detalle.price}</span>
+                </div>
+
+                <div className='detalles-opciones'>
+                  <div className='size'>
+                    <label>Seleccionar Tamaño:</label>
+                    <select aria-label="Seleccionar tamaño" className="select-tamaño">
+                      {[36,37,38,39,40,41,42,43,44].map(size => (
+                        <option key={size} value={size}>{size}</option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  <button className="btn-agregar" onClick={() => addCarrito(detalle.id)}>
+                    🛒 Añadir al carrito
+                  </button>
+                  <button className="btn-comprar">💳 Comprar ahora</button>
+                </div>
+
+                <div className='detalles-envio'>
+                  <div className='envio-item'>
+                    <span>📦</span>
+                    <p>Envío gratis a partir de $100</p>
+                  </div>
+                  <div className='envio-item'>
+                    <span>✔️</span>
+                    <p>Producto original garantizado</p>
+                  </div>
+                  <div className='envio-item'>
+                    <span>🔄</span>
+                    <p>Devolución sin costo en 30 días</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className='detalles-descripcion'>
+              <h3>Descripción del Producto</h3>
+              <p>{detalle.description}</p>
+              <h4>Características principales:</h4>
+              <ul>
+                <li>Material: Tela transpirable y resistente</li>
+                <li>Suela: Goma de alto agarre</li>
+                <li>Amortiguación: Espuma reactiva</li>
+                <li>Peso: Ligero y cómodo</li>
+                <li>Uso: Entrenamiento y casual</li>
+              </ul>
+            </div>
+          </div>
+
+          {showModal && (
+            <div className='detalle-modal' onClick={() => setShowModal(false)}>
+              <div className='detalle-modal-content' onClick={e => e.stopPropagation()}>
+                <button className='detalle-modal-close' onClick={() => setShowModal(false)}>
+                  <FiX />
+                </button>
+                <img src={detalle.image} alt={detalle.title} className='detalle-modal-imagen' />
+                <p className='detalle-modal-title'>{detalle.title}</p>
+              </div>
+            </div>
+          )}
+          
+          <h2 className='relacionados'>Productos Relacionados</h2>
+          <div className='productos'>
+          {relacionados.map(producto => (
+              <ProductoItem 
+                key={producto.id}
+                id={producto.id}
+                title={producto.title}
+                price={producto.price}
+                image={producto.image}
+                category={producto.category}
+                cantidad={producto.cantidad}
+              />
+            ))}    
+          </div>
+        </>
     )
 }

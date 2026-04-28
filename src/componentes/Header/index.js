@@ -2,16 +2,15 @@ import React, {useContext } from 'react'
 import logo from "../../images/logo.png";
 import { Link } from "react-router-dom";
 import { DataContext } from "../../context/DataProvider"
+import { FiShoppingCart } from "react-icons/fi"
 
 
 export const Header = () => {
 
-    const value =useContext (DataContext);
-    const [menu, setMenu] = value.menu;
-    const [carrito] = value.carrito
+    const { menu, setMenu, carrito } = useContext(DataContext);
 
     const toogleMenu = () => {
-        setMenu (!menu)
+        setMenu(!menu);
     }
     return (
         <header>
@@ -32,7 +31,7 @@ export const Header = () => {
                 </li>
             </ul>
             <div className="cart" onClick={toogleMenu}>
-               <box-icon name="cart"></box-icon> 
+               <FiShoppingCart /> 
                <span className="item__total">{carrito.length}</span>
             </div>
         </header>

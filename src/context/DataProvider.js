@@ -4,20 +4,10 @@ import Data from "../Data.js"
 export const DataContext = createContext();
 
 export const DataProvider = (props) =>{
-    const [productos, setProductos] = useState([])
+    const [productos] = useState(Data.items)
     const [menu, setMenu] = useState(false);
     const [carrito, setCarrito] = useState([]);
-    const [total, setTotal] = useState();
-
-useEffect(()=>{
-  const producto = Data.items
-  if (producto){
-    setProductos(producto)  
-  } else {
-      setProductos([])
-  }
-  
-},[])
+    const [total, setTotal] = useState(0);
 
 const addCarrito = (id) =>{
    const check = carrito.every(item =>{
@@ -54,11 +44,13 @@ useEffect (() =>{
 },[carrito])
 
 const value = {
-    productos : [productos],
-    menu: [menu, setMenu],
-    addCarrito: addCarrito,
-    carrito: [carrito, setCarrito],
-    total: [total, setTotal]
+    productos,
+    menu,
+    setMenu,
+    addCarrito,
+    carrito,
+    setCarrito,
+    total
  }
  return (
      <DataContext.Provider value = {value}>
